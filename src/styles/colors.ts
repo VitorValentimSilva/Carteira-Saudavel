@@ -1,5 +1,7 @@
 export const colors = {
-  Background: "#F9FAFB",
+  Background: "#f3f4f6",
+  PrimaryColor: "#2DD4BF",
+  SecondaryColor: "#8B5CF6",
 
   gray: {
     200: "#1F2937",
