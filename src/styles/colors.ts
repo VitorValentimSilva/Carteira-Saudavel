@@ -1,6 +1,6 @@
-import { green } from "react-native-reanimated/lib/typescript/Colors";
-
 export const colors = {
+  Background: "#F9FAFB",
+
   gray: {
     200: "#1F2937",
     300: "#374151",
