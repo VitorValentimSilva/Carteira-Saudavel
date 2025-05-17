@@ -7,18 +7,20 @@ type Props = {
 };
 
 export default function CategorySelect({ name, options }: Props) {
-  const [field, , helpers] = useField(name);
+  const [field, meta, helpers] = useField(name);
 
   return (
     <View className="mb-4">
       <Text className="text-gray-700 mb-2">Categoria</Text>
-      <View className="flex-row flex-wrap gap-2">
+      <View className="flex-row flex-wrap gap-3">
         {options.map((option) => (
           <TouchableOpacity
             key={option}
-            onPress={() => helpers.setValue(option)}
+            onPress={() => {
+              helpers.setValue(option);
+            }}
             className={`px-3 py-1 rounded ${
-              field.value === option ? "bg-blue-500" : "bg-gray-200"
+              field.value === option ? "bg-PrimaryColor" : "bg-zinc-200"
             }`}
           >
             <Text
@@ -29,6 +31,10 @@ export default function CategorySelect({ name, options }: Props) {
           </TouchableOpacity>
         ))}
       </View>
+
+      {meta.touched && meta.error && (
+        <Text className="text-red-500 text-base mt-1">{meta.error}</Text>
+      )}
     </View>
   );
 }

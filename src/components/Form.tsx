@@ -19,13 +19,23 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
   const validationSchema =
     type === "gastos"
       ? Yup.object({
-          data: Yup.string().required("Informe a data"),
+          data: Yup.string()
+            .matches(
+              /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
+              "Data deve estar no formato dd/mm/aaaa"
+            )
+            .required("Informe a data2"),
           valor: Yup.number().required("Informe o valor"),
           descricao: Yup.string().required("Descreva o gasto"),
           categoria: Yup.string().required("Escolha uma categoria"),
         })
       : Yup.object({
-          data: Yup.string().required("Informe a data"),
+          data: Yup.string()
+            .matches(
+              /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
+              "Data deve estar no formato dd/mm/aaaa"
+            )
+            .required("Informe a data2"),
           descricao: Yup.string().required("Descreva a atividade"),
           categoria: Yup.string().required("Escolha uma categoria"),
         });
@@ -37,21 +47,38 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
       onSubmit={onSubmit}
     >
       {({ handleSubmit }) => (
-        <View className="p-4 gap-4 bg-white rounded-[12px]">
-          <Input name="data" label="Data" placeholder="Data (dd/mm/aaaa)" />
+        <View className="p-5 gap-4 bg-white rounded-2xl w-full">
+          <Input
+            type="date"
+            name="data"
+            label="Data"
+            placeholder="Data (dd/mm/aaaa)"
+            keyboardType="numeric"
+          />
 
           {type === "gastos" && (
-            <Input name="valor" label="Valor" placeholder="Valor (R$)" />
+            <Input
+              type="number"
+              name="valor"
+              label="Valor"
+              placeholder="Valor (R$)"
+              keyboardType="numeric"
+            />
           )}
 
-          <Input name="descricao" label="Descrição" placeholder="Descrição" />
+          <Input
+            type="text"
+            name="descricao"
+            label="Descrição"
+            placeholder="Descrição"
+          />
 
           <CategorySelect
             name="categoria"
             options={
               type === "gastos"
                 ? ["Comida", "Transporte", "Lazer"]
-                : ["Exercício", "Sono", "Água", "Alimentação"]
+                : ["Exercício", "Sono", "Água", "Alimentação", "Medicação"]
             }
           />
 

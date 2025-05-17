@@ -32,9 +32,12 @@ export default function TabRoutes() {
     <Tab.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#FFFFF",
-          elevation: 0,
-          shadowOpacity: 0,
+          backgroundColor: "#FFFFFF",
+          elevation: 10, // cor da sombra no Android
+          shadowColor: "#000", // cor da sombra no iOS
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
@@ -44,6 +47,11 @@ export default function TabRoutes() {
           left: 0,
           right: 0,
           height: 60,
+          elevation: 10, // Android
+          shadowColor: "#000", // iOS
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
       }}
     >
