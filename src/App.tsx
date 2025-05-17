@@ -1,8 +1,11 @@
 import "./styles/global.css";
 import Routes from "./routes";
+import { AuthProvider } from "./contexts/AuthContext";
 
 export default function App() {
   return (
-    <Routes />
+    <AuthProvider>
+      <Routes />
+    </AuthProvider>
   );
 }

@@ -49,8 +49,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
       {({ handleSubmit }) => (
         <View className="p-5 gap-4 bg-white rounded-2xl w-full">
           <Input
-            type="date"
-            name="data"
+            name="date"
             label="Data"
             placeholder="Data (dd/mm/aaaa)"
             keyboardType="numeric"
@@ -58,7 +57,6 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
 
           {type === "gastos" && (
             <Input
-              type="number"
               name="valor"
               label="Valor"
               placeholder="Valor (R$)"
@@ -66,12 +64,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
             />
           )}
 
-          <Input
-            type="text"
-            name="descricao"
-            label="Descrição"
-            placeholder="Descrição"
-          />
+          <Input name="descricao" label="Descrição" placeholder="Descrição" />
 
           <CategorySelect
             name="categoria"

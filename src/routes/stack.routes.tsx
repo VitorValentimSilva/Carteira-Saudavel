@@ -1,6 +1,7 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import TabRoutes from "./tab.routes";
-import { AuthScreen } from "../screens/AuthScreen";
+import { SignUpScreen } from "../screens/SignUpScreen";
+import { LoginScreen } from "../screens/LoginScreen";
 
 const Stack = createStackNavigator();
 
@@ -12,7 +13,8 @@ export default function StackRoutes() {
         cardStyle: { backgroundColor: "#FFFFFF" },
       }}
     >
-      <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
       <Stack.Screen name="Home" component={TabRoutes} />
     </Stack.Navigator>
   );

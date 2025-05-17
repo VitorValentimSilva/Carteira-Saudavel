@@ -1,21 +1,16 @@
-import { TextInput, Text, View, KeyboardTypeOptions } from "react-native";
+import { TextInput, Text, View, TextInputProps } from "react-native";
 import { useField } from "formik";
 
 type Props = {
-  type: string;
   name: string;
   label: string;
-  keyboardType?: KeyboardTypeOptions;
-  placeholder?: string;
-  secureTextEntry?: boolean;
-  multiline?: boolean;
-};
+} & TextInputProps;
 
-export default function Input({ type, name, label, ...props }: Props) {
+export default function Input({ name, label, ...props }: Props) {
   const [field, meta, helpers] = useField(name);
 
   const handleChangeText = (text: string) => {
-    if (type === "date") {
+    if (name === "date") {
       const cleaned = text.replace(/\D/g, "");
       const day = cleaned.slice(0, 2);
       const month = cleaned.slice(2, 4);
@@ -38,7 +33,7 @@ export default function Input({ type, name, label, ...props }: Props) {
         value={field.value}
         onChangeText={handleChangeText}
         onBlur={() => helpers.setTouched(true)}
-        maxLength={type === "date" ? 10 : undefined}
+        maxLength={name === "date" ? 10 : undefined}
         {...props}
       />
 
