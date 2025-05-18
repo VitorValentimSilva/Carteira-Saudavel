@@ -10,6 +10,13 @@ type Props = {
   onCancel: () => void;
 };
 
+type FormValues = {
+  data: string;
+  valor?: string;
+  descricao: string;
+  categoria: string;
+};
+
 export default function Form({ type, onSubmit, onCancel }: Props) {
   const initialValues =
     type === "gastos"
@@ -24,7 +31,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
               /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
               "Data deve estar no formato dd/mm/aaaa"
             )
-            .required("Informe a data2"),
+            .required("Informe a data"),
           valor: Yup.number().required("Informe o valor"),
           descricao: Yup.string().required("Descreva o gasto"),
           categoria: Yup.string().required("Escolha uma categoria"),
@@ -35,7 +42,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
               /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
               "Data deve estar no formato dd/mm/aaaa"
             )
-            .required("Informe a data2"),
+            .required("Informe a data"),
           descricao: Yup.string().required("Descreva a atividade"),
           categoria: Yup.string().required("Escolha uma categoria"),
         });
@@ -44,12 +51,12 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={onSubmit}
+      onSubmit={(values: FormValues) => onSubmit(values)}
     >
       {({ handleSubmit }) => (
         <View className="p-5 gap-4 bg-white rounded-2xl w-full">
           <Input
-            name="date"
+            name="data"
             label="Data"
             placeholder="Data (dd/mm/aaaa)"
             keyboardType="numeric"

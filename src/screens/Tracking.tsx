@@ -1,17 +1,28 @@
 import { useState } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity, Alert } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import Form from "../components/Form";
 import { colors } from "../styles/colors";
+import { useData } from "../contexts/DataContext";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Tracking() {
   const [activeType, setActiveType] = useState<"gastos" | "saude">("saude");
-  const [formType, setFormType] = useState<"gastos" | "saude" | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const { saveRecord } = useData();
+  const navigation = useNavigation();
 
   const handleTypeChange = (type: "gastos" | "saude") => {
     setActiveType(type);
-    if (formType !== null) {
-      setFormType(type);
+    setShowForm(false);
+  };
+
+  const handleSubmit = async (values: any) => {
+    try {
+      await saveRecord(activeType, values);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao salvar registro");
     }
   };
 
@@ -45,10 +56,10 @@ export default function Tracking() {
         </TouchableOpacity>
       </View>
 
-      {!formType ? (
+      {!showForm ? (
         <View className="flex-row mb-6 w-full">
           <TouchableOpacity
-            onPress={() => setFormType(activeType)}
+            onPress={() => setShowForm(true)}
             className="w-full"
           >
             <View className="flex-row items-center justify-center gap-3 py-3 bg-white rounded-xl">
@@ -65,12 +76,9 @@ export default function Tracking() {
         </View>
       ) : (
         <Form
-          type={formType}
-          onSubmit={(values) => {
-            console.log("Formulário enviado:", values);
-            setFormType(null);
-          }}
-          onCancel={() => setFormType(null)}
+          type={activeType}
+          onSubmit={handleSubmit}
+          onCancel={() => setShowForm(false)}
         />
       )}
     </View>

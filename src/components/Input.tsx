@@ -10,7 +10,7 @@ export default function Input({ name, label, ...props }: Props) {
   const [field, meta, helpers] = useField(name);
 
   const handleChangeText = (text: string) => {
-    if (name === "date") {
+    if (name === "data") {
       const cleaned = text.replace(/\D/g, "");
       const day = cleaned.slice(0, 2);
       const month = cleaned.slice(2, 4);
@@ -33,7 +33,7 @@ export default function Input({ name, label, ...props }: Props) {
         value={field.value}
         onChangeText={handleChangeText}
         onBlur={() => helpers.setTouched(true)}
-        maxLength={name === "date" ? 10 : undefined}
+        maxLength={name === "data" ? 10 : undefined}
         {...props}
       />
 
