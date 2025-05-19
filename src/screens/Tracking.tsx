@@ -5,6 +5,7 @@ import Form from "../components/Form";
 import { colors } from "../styles/colors";
 import { useData } from "../contexts/DataContext";
 import { useNavigation } from "@react-navigation/native";
+import RecordList from "../components/RecordList";
 
 export default function Tracking() {
   const [activeType, setActiveType] = useState<"gastos" | "saude">("saude");
@@ -57,23 +58,29 @@ export default function Tracking() {
       </View>
 
       {!showForm ? (
-        <View className="flex-row mb-6 w-full">
-          <TouchableOpacity
-            onPress={() => setShowForm(true)}
-            className="w-full"
-          >
-            <View className="flex-row items-center justify-center gap-3 py-3 bg-white rounded-xl">
-              <AntDesign
-                name="pluscircleo"
-                size={20}
-                color={colors.PrimaryColor}
-              />
-              <Text className="text-PrimaryColor font-semibold text-lg">
-                Registrar {activeType === "saude" ? "Saúde" : "Gasto"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        <>
+          <View className="flex-row mb-6 w-full">
+            <TouchableOpacity
+              onPress={() => setShowForm(true)}
+              className="w-full"
+            >
+              <View className="flex-row items-center justify-center gap-3 py-3 bg-white rounded-xl">
+                <AntDesign
+                  name="pluscircleo"
+                  size={20}
+                  color={colors.PrimaryColor}
+                />
+                <Text className="text-PrimaryColor font-semibold text-lg">
+                  Registrar {activeType === "saude" ? "Saúde" : "Gasto"}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <View className="flex-1 w-full">
+            <RecordList type={activeType} />
+          </View>
+        </>
       ) : (
         <Form
           type={activeType}

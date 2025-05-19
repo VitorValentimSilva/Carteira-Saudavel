@@ -32,7 +32,9 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
               "Data deve estar no formato dd/mm/aaaa"
             )
             .required("Informe a data"),
-          valor: Yup.number().required("Informe o valor"),
+          valor: Yup.number()
+            .required("Informe o valor")
+            .min(0.01, "Valor deve ser maior que zero"),
           descricao: Yup.string().required("Descreva o gasto"),
           categoria: Yup.string().required("Escolha uma categoria"),
         })

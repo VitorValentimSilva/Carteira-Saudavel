@@ -1,18 +1,52 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../services/firebaseConfig";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
+type RecordType = "gastos" | "saude";
+
+interface BaseRecord {
+  id: string;
+  data: Date;
+  descricao: string;
+  categoria: string;
+  criadoEm: Timestamp;
+}
+
+export interface Gastos extends BaseRecord {
+  valor: number;
+}
+
+export interface Saude extends BaseRecord {
+  duracao?: number;
+}
+
 type DataContextType = {
-  saveRecord: (type: "gastos" | "saude", data: any) => Promise<void>;
+  saveRecord: (type: RecordType, data: any) => Promise<void>;
+  getRecords: <T extends BaseRecord>(type: RecordType) => Promise<T[]>;
+  loading: boolean;
+  error: string | null;
 };
 
 const DataContext = createContext<DataContextType>({
   saveRecord: async () => {},
+  getRecords: async () => [],
+  loading: false,
+  error: null,
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const saveRecord = async (type: "gastos" | "saude", formData: any) => {
     try {
@@ -37,13 +71,36 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const convertToDate = (dateString: string) => {
-    const [day, month, year] = dateString.split("/");
-    return new Date(`${year}-${month}-${day}`);
+  const getRecords = async <T extends BaseRecord>(
+    type: RecordType
+  ): Promise<T[]> => {
+    if (!user) return [];
+
+    setLoading(true);
+    try {
+      const collectionRef = collection(db, "users", user.uid, type);
+      const q = query(collectionRef);
+      const querySnapshot = await getDocs(q);
+
+      return querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+            data: (doc.data().data as Timestamp).toDate(),
+          } as T)
+      );
+    } catch (err) {
+      setError("Erro ao carregar registros");
+      console.error(err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <DataContext.Provider value={{ saveRecord }}>
+    <DataContext.Provider value={{ saveRecord, getRecords, loading, error }}>
       {children}
     </DataContext.Provider>
   );
