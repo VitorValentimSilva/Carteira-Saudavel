@@ -1,9 +1,21 @@
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import RecentActivity from "../components/RecentActivity";
+import { useData } from "../contexts/DataContext";
+import { useFocusEffect } from "@react-navigation/native";
+import React from "react";
 
 export default function Dashboard() {
+  const { refreshData } = useData();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshData();
+    }, [])
+  );
+
   return (
-    <View className="flex-1 items-center justify-center bg-Background">
-      <Text className="text-red-600">Dashboard</Text>
+    <View className="flex-1 items-center justify-center p-4">
+      <RecentActivity />
     </View>
   );
 }

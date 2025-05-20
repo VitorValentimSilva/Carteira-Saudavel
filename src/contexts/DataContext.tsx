@@ -1,11 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { db } from "../services/firebaseConfig";
 import {
   collection,
   addDoc,
   serverTimestamp,
   query,
-  where,
   getDocs,
   Timestamp,
 } from "firebase/firestore";
@@ -32,6 +31,8 @@ export interface Saude extends BaseRecord {
 type DataContextType = {
   saveRecord: (type: RecordType, data: any) => Promise<void>;
   getRecords: <T extends BaseRecord>(type: RecordType) => Promise<T[]>;
+  getRecentRecords: () => Promise<(Gastos | Saude)[]>;
+  refreshData: () => void;
   loading: boolean;
   error: string | null;
 };
@@ -39,6 +40,8 @@ type DataContextType = {
 const DataContext = createContext<DataContextType>({
   saveRecord: async () => {},
   getRecords: async () => [],
+  getRecentRecords: async () => [],
+  refreshData: () => {},
   loading: false,
   error: null,
 });
@@ -47,6 +50,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  const refreshData = () => {
+    setRefreshCount((prev) => prev + 1);
+  };
 
   const saveRecord = async (type: "gastos" | "saude", formData: any) => {
     try {
@@ -58,7 +66,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const recordData = {
         ...formData,
         data: new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`),
-        valor: type === "gastos" ? parseFloat(formData.valor) : null,
+        valor: type === "gastos" ? parseFloat(formData.valor) || 0 : null,
         criadoEm: serverTimestamp(),
       };
 
@@ -99,8 +107,41 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const getRecentRecords = async (): Promise<(Gastos | Saude)[]> => {
+    if (!user) return [];
+
+    setLoading(true);
+    try {
+      const [gastos, saude] = await Promise.all([
+        getRecords<Gastos>("gastos"),
+        getRecords<Saude>("saude"),
+      ]);
+
+      const allRecords = [...gastos, ...saude]
+        .sort((a, b) => b.criadoEm.toMillis() - a.criadoEm.toMillis())
+        .slice(0, 6);
+
+      return allRecords;
+    } catch (err) {
+      setError("Erro ao carregar registros recentes");
+      console.error(err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <DataContext.Provider value={{ saveRecord, getRecords, loading, error }}>
+    <DataContext.Provider
+      value={{
+        saveRecord,
+        getRecords,
+        getRecentRecords,
+        refreshData,
+        loading,
+        error,
+      }}
+    >
       {children}
     </DataContext.Provider>
   );
