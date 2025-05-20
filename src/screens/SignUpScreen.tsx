@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Alert } from "react-native";
+import { View, Alert, Image } from "react-native";
 import FormAuth from "../components/FormAuth";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAuth } from "../contexts/AuthContext";
@@ -21,7 +21,12 @@ export const SignUpScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <View className="flex-1 justify-center p-4 bg-gray-100">
+    <View className="flex-1 p-4 bg-gray-100">
+      <Image
+        source={require("../assets/logo2.png")}
+        className="w-full h-80"
+      />
+
       <FormAuth
         isSignUp={true}
         onSubmit={handleSubmit}

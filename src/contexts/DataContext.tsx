@@ -7,6 +7,7 @@ import {
   query,
   getDocs,
   Timestamp,
+  orderBy,
 } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 
@@ -87,7 +88,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     try {
       const collectionRef = collection(db, "users", user.uid, type);
-      const q = query(collectionRef);
+      const q = query(collectionRef, orderBy("data", "desc"));
       const querySnapshot = await getDocs(q);
 
       return querySnapshot.docs.map(

@@ -77,7 +77,7 @@ export default function Tracking() {
             </TouchableOpacity>
           </View>
 
-          <View className="flex-1 w-full">
+          <View className="flex-1 w-full mb-10">
             <RecordList type={activeType} />
           </View>
         </>
