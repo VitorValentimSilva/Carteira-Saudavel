@@ -10,6 +10,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
+import { storeData } from "../storage/asyncStorage";
 
 type RecordType = "gastos" | "saude";
 
@@ -91,7 +92,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const q = query(collectionRef, orderBy("data", "desc"));
       const querySnapshot = await getDocs(q);
 
-      return querySnapshot.docs.map(
+      const records = querySnapshot.docs.map(
         (doc) =>
           ({
             id: doc.id,
@@ -99,6 +100,9 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
             data: (doc.data().data as Timestamp).toDate(),
           } as T)
       );
+
+      await storeData(`${type}_records`, records);
+      return records;
     } catch (err) {
       setError("Erro ao carregar registros");
       console.error(err);
