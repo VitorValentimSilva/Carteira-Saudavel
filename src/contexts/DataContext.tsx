@@ -27,7 +27,7 @@ export interface Gastos extends BaseRecord {
 }
 
 export interface Saude extends BaseRecord {
-  duracao?: number;
+  valor: number;
 }
 
 type DataContextType = {
@@ -68,7 +68,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const recordData = {
         ...formData,
         data: new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`),
-        valor: type === "gastos" ? parseFloat(formData.valor) || 0 : null,
+        valor: parseFloat(formData.valor) || 0,
         criadoEm: serverTimestamp(),
       };
 

@@ -1,4 +1,4 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { Gastos, Saude, useData } from "../contexts/DataContext";
 import React, { useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
@@ -18,12 +18,22 @@ export default function RecentActivity() {
   );
 
   const formatValue = (item: Gastos | Saude) => {
-    if ("valor" in item) {
-      return item.valor !== null && item.valor !== undefined
-        ? `R$ ${item.valor.toFixed(2)}`
-        : "R$ 0.00";
+    const isGasto = ["Comida", "Transporte", "Lazer"].includes(item.categoria);
+
+    if (isGasto) {
+      return `R$ ${item.valor.toFixed(2)}`;
     }
-    return item.categoria;
+
+    switch (item.categoria) {
+      case "Exercício":
+        return `${item.valor} min`;
+      case "Sono":
+        return `${item.valor} h`;
+      case "Água":
+        return `${item.valor} L`;
+      default:
+        return item.valor.toString();
+    }
   };
 
   const renderItem = ({ item }: { item: Gastos | Saude }) => (
@@ -49,7 +59,7 @@ export default function RecentActivity() {
       <Text className="text-lg font-bold mb-4">Atividade Recente</Text>
 
       {loading ? (
-        <Text className="text-gray-500">Carregando...</Text>
+        <ActivityIndicator size="small" color="#3b82f6" />
       ) : recentItems.length === 0 ? (
         <Text className="text-gray-500">Nenhuma atividade recente</Text>
       ) : (

@@ -12,50 +12,69 @@ type Props = {
 
 type FormValues = {
   data: string;
-  valor?: string;
+  valor: string;
   descricao: string;
   categoria: string;
 };
 
 export default function Form({ type, onSubmit, onCancel }: Props) {
-  const initialValues =
-    type === "gastos"
-      ? { data: "", valor: "", descricao: "", categoria: "" }
-      : { data: "", descricao: "", categoria: "" };
+  const initialValues = {
+    data: "",
+    valor: "",
+    descricao: "",
+    categoria: "",
+  };
 
-  const validationSchema =
-    type === "gastos"
-      ? Yup.object({
-          data: Yup.string()
-            .matches(
-              /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
-              "Data deve estar no formato dd/mm/aaaa"
-            )
-            .required("Informe a data"),
-          valor: Yup.number()
-            .required("Informe o valor")
-            .min(0.01, "Valor deve ser maior que zero"),
-          descricao: Yup.string().required("Descreva o gasto"),
-          categoria: Yup.string().required("Escolha uma categoria"),
-        })
-      : Yup.object({
-          data: Yup.string()
-            .matches(
-              /^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/,
-              "Data deve estar no formato dd/mm/aaaa"
-            )
-            .required("Informe a data"),
-          descricao: Yup.string().required("Descreva a atividade"),
-          categoria: Yup.string().required("Escolha uma categoria"),
-        });
+  const getValidationSchema = () => {
+    const baseSchema = {
+      data: Yup.string()
+        .matches(/^([0-2]\d|3[0-1])\/(0\d|1[0-2])\/\d{4}$/, "Data inválida")
+        .required("Obrigatório"),
+      descricao: Yup.string().required("Obrigatório"),
+      categoria: Yup.string().required("Obrigatório"),
+      valor: Yup.number(),
+    };
+
+    if (type === "gastos") {
+      return Yup.object({
+        ...baseSchema,
+        valor: baseSchema.valor
+          .required("Obrigatório")
+          .min(0.01, "Mínimo R$ 0,01"),
+      });
+    }
+
+    return Yup.object({
+      ...baseSchema,
+      valor: Yup.number()
+        .typeError("Digite um valor numérico")
+        .when("categoria", (categoria: any, schema: any) => {
+          const cat = Array.isArray(categoria) ? categoria[0] : categoria;
+          switch (cat) {
+            case "Exercício":
+              return schema
+                .min(1, "Mínimo 1 minuto")
+                .max(360, "Máximo 6 horas");
+            case "Sono":
+              return schema.min(1, "Mínimo 1 hora").max(24, "Máximo 24 horas");
+            case "Água":
+              return schema
+                .min(0.3, "Mínimo 300ml")
+                .max(10, "Máximo 10 litros");
+            default:
+              return schema;
+          }
+        }),
+    });
+  };
 
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={validationSchema}
+      validationSchema={getValidationSchema}
       onSubmit={(values: FormValues) => onSubmit(values)}
     >
-      {({ handleSubmit }) => (
+      {({ handleSubmit, values }) => (
         <View className="p-5 gap-4 bg-white rounded-2xl w-full">
           <Input
             name="data"
@@ -64,23 +83,49 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
             keyboardType="numeric"
           />
 
-          {type === "gastos" && (
-            <Input
-              name="valor"
-              label="Valor"
-              placeholder="Valor (R$)"
-              keyboardType="numeric"
-            />
-          )}
-
-          <Input name="descricao" label="Descrição" placeholder="Descrição" />
-
           <CategorySelect
             name="categoria"
             options={
               type === "gastos"
                 ? ["Comida", "Transporte", "Lazer"]
-                : ["Exercício", "Sono", "Água", "Alimentação", "Medicação"]
+                : ["Exercício", "Sono", "Água"]
+            }
+          />
+
+          <Input
+            name="valor"
+            label={
+              type === "gastos"
+                ? "Valor (R$)"
+                : values.categoria === "Exercício"
+                ? "Tempo (minutos)"
+                : values.categoria === "Sono"
+                ? "Horas de sono"
+                : values.categoria === "Água"
+                ? "Litros de água"
+                : "Valor"
+            }
+            placeholder={
+              type === "gastos"
+                ? "0,00"
+                : values.categoria === "Exercício"
+                ? "Ex: 45"
+                : values.categoria === "Sono"
+                ? "Ex: 8"
+                : values.categoria === "Água"
+                ? "Ex: 2.5"
+                : "Valor"
+            }
+            keyboardType="decimal-pad"
+          />
+
+          <Input
+            name="descricao"
+            label="Descrição"
+            placeholder={
+              type === "gastos"
+                ? "Descrição do gasto"
+                : "Descrição da atividade"
             }
           />
 
