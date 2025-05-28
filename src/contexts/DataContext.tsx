@@ -11,6 +11,11 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
 import { storeData } from "../storage/asyncStorage";
+import { MonthlyData } from "../types";
+import {
+  getCurrentMonthData,
+  isDateInCurrentMonth,
+} from "../utils/dataProcessing";
 
 type RecordType = "gastos" | "saude";
 
@@ -35,6 +40,8 @@ type DataContextType = {
   getRecords: <T extends BaseRecord>(type: RecordType) => Promise<T[]>;
   getRecentRecords: () => Promise<(Gastos | Saude)[]>;
   refreshData: () => void;
+  getMonthData: () => Promise<MonthlyData>;
+  refreshCount: number;
   loading: boolean;
   error: string | null;
 };
@@ -44,6 +51,8 @@ const DataContext = createContext<DataContextType>({
   getRecords: async () => [],
   getRecentRecords: async () => [],
   refreshData: () => {},
+  getMonthData: async () => ({ sleep: [], exercise: [], water: [] }),
+  refreshCount: 0,
   loading: false,
   error: null,
 });
@@ -75,6 +84,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const collectionRef = collection(db, "users", user.uid, type);
       const docRef = await addDoc(collectionRef, recordData);
       console.log("Documento salvo com ID:", docRef.id);
+      refreshData();
     } catch (error) {
       console.error("Erro ao salvar:", error);
       throw error;
@@ -136,6 +146,43 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const getMonthData = async (): Promise<MonthlyData> => {
+    if (!user) return { sleep: [], exercise: [], water: [] };
+
+    try {
+      const healthData = await getRecords<Saude>("saude");
+      const { daysInMonth } = getCurrentMonthData();
+
+      const initialData: MonthlyData = {
+        sleep: new Array(daysInMonth).fill(0),
+        exercise: new Array(daysInMonth).fill(0),
+        water: new Array(daysInMonth).fill(0),
+      };
+
+      healthData.forEach((record) => {
+        if (!isDateInCurrentMonth(record.data)) return;
+
+        const dayIndex = record.data.getDate() - 1;
+        switch (record.categoria) {
+          case "Sono":
+            initialData.sleep[dayIndex] += record.valor;
+            break;
+          case "Exercício":
+            initialData.exercise[dayIndex] += record.valor;
+            break;
+          case "Água":
+            initialData.water[dayIndex] += record.valor;
+            break;
+        }
+      });
+
+      return initialData;
+    } catch (error) {
+      console.error("Error fetching month data:", error);
+      return { sleep: [], exercise: [], water: [] };
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -143,6 +190,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         getRecords,
         getRecentRecords,
         refreshData,
+        getMonthData,
+        refreshCount,
         loading,
         error,
       }}

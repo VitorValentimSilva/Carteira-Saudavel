@@ -1,5 +1,5 @@
 const calculateAverage = (data: number[]): number => {
-  if (data.length === 0) return 0; // Retorna 0 se não houver dados
+  if (data.length === 0) return 0;
   const total = data.reduce((sum, value) => sum + value, 0);
   return total / data.length;
 };
@@ -8,8 +8,9 @@ export const calculateSleepAverage = (sleepData: number[]): number => {
   return calculateAverage(sleepData);
 };
 
-export const calculateExerciseTotal = (exerciseData: number[]): number => {
-  return exerciseData.reduce((sum, hours) => sum + hours, 0);
+export const calculateExerciseAverage = (exerciseData: number[]): number => {
+  const avgMinutes = calculateAverage(exerciseData);
+  return avgMinutes / 60;
 };
 
 export const calculateWaterAverage = (waterData: number[]): number => {
@@ -20,8 +21,8 @@ export const calculateSleepPercentage = (sleepAverage: number): number => {
   return Math.min((sleepAverage / 8) * 100, 100);
 };
 
-export const calculateExercisePercentage = (exerciseTotal: number): number => {
-  return Math.min((exerciseTotal / 20) * 100, 100);
+export const calculateExercisePercentage = (exerciseHours: number): number => {
+  return Math.min(exerciseHours * 100, 100);
 };
 
 export const calculateWaterPercentage = (waterAverage: number): number => {

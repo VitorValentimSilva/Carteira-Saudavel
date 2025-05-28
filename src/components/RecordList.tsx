@@ -24,7 +24,9 @@ export default function RecordList({ type }: Props) {
   }, [type]);
 
   const formatValue = (item: Gastos | Saude) => {
-    if (item as Gastos) {
+    const isGasto = ["Comida", "Transporte", "Lazer"].includes(item.categoria);
+
+    if (isGasto) {
       return `R$ ${item.valor.toFixed(2)}`;
     }
 
