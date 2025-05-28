@@ -17,28 +17,21 @@ import {
   isDateInCurrentMonth,
 } from "../utils/dataProcessing";
 
-type RecordType = "gastos" | "saude";
+type RecordType = "financeiro" | "saude";
 
-interface BaseRecord {
+export interface BaseRecord {
   id: string;
   data: Date;
   descricao: string;
   categoria: string;
   criadoEm: Timestamp;
-}
-
-export interface Gastos extends BaseRecord {
-  valor: number;
-}
-
-export interface Saude extends BaseRecord {
   valor: number;
 }
 
 type DataContextType = {
   saveRecord: (type: RecordType, data: any) => Promise<void>;
   getRecords: <T extends BaseRecord>(type: RecordType) => Promise<T[]>;
-  getRecentRecords: () => Promise<(Gastos | Saude)[]>;
+  getRecentRecords: () => Promise<BaseRecord[]>;
   refreshData: () => void;
   getMonthData: () => Promise<MonthlyData>;
   refreshCount: number;
@@ -67,7 +60,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshCount((prev) => prev + 1);
   };
 
-  const saveRecord = async (type: "gastos" | "saude", formData: any) => {
+  const saveRecord = async (type: RecordType, formData: any) => {
     try {
       if (!user) throw new Error("Usuário não autenticado");
 
@@ -79,6 +72,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         data: new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`),
         valor: parseFloat(formData.valor) || 0,
         criadoEm: serverTimestamp(),
+        descricao: formData.descricao || "",
+        categoria: formData.categoria || "",
       };
 
       const collectionRef = collection(db, "users", user.uid, type);
@@ -102,17 +97,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const q = query(collectionRef, orderBy("data", "desc"));
       const querySnapshot = await getDocs(q);
 
-      const records = querySnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            data: (doc.data().data as Timestamp).toDate(),
-          } as T)
-      );
-
-      await storeData(`${type}_records`, records);
-      return records;
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        data: (doc.data().data as Timestamp).toDate(),
+      })) as T[];
     } catch (err) {
       setError("Erro ao carregar registros");
       console.error(err);
@@ -122,21 +111,19 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const getRecentRecords = async (): Promise<(Gastos | Saude)[]> => {
+  const getRecentRecords = async (): Promise<BaseRecord[]> => {
     if (!user) return [];
 
     setLoading(true);
     try {
-      const [gastos, saude] = await Promise.all([
-        getRecords<Gastos>("gastos"),
-        getRecords<Saude>("saude"),
+      const [financeiro, saude] = await Promise.all([
+        getRecords<BaseRecord>("financeiro"),
+        getRecords<BaseRecord>("saude"),
       ]);
 
-      const allRecords = [...gastos, ...saude]
+      return [...financeiro, ...saude]
         .sort((a, b) => b.criadoEm.toMillis() - a.criadoEm.toMillis())
         .slice(0, 6);
-
-      return allRecords;
     } catch (err) {
       setError("Erro ao carregar registros recentes");
       console.error(err);
@@ -150,7 +137,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user) return { sleep: [], exercise: [], water: [] };
 
     try {
-      const healthData = await getRecords<Saude>("saude");
+      const healthData = await getRecords<BaseRecord>("saude");
       const { daysInMonth } = getCurrentMonthData();
 
       const initialData: MonthlyData = {

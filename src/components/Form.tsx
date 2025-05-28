@@ -5,7 +5,7 @@ import Input from "./Input";
 import CategorySelect from "./CategorySelect";
 
 type Props = {
-  type: "gastos" | "saude";
+  type: "financeiro" | "saude";
   onSubmit: (values: any) => void;
   onCancel: () => void;
 };
@@ -35,7 +35,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
       valor: Yup.number(),
     };
 
-    if (type === "gastos") {
+    if (type === "financeiro") {
       return Yup.object({
         ...baseSchema,
         valor: baseSchema.valor
@@ -86,7 +86,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
           <CategorySelect
             name="categoria"
             options={
-              type === "gastos"
+              type === "financeiro"
                 ? ["Comida", "Transporte", "Lazer"]
                 : ["Exercício", "Sono", "Água"]
             }
@@ -95,7 +95,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
           <Input
             name="valor"
             label={
-              type === "gastos"
+              type === "financeiro"
                 ? "Valor (R$)"
                 : values.categoria === "Exercício"
                 ? "Tempo (minutos)"
@@ -106,7 +106,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
                 : "Valor"
             }
             placeholder={
-              type === "gastos"
+              type === "financeiro"
                 ? "0,00"
                 : values.categoria === "Exercício"
                 ? "Ex: 45"
@@ -123,7 +123,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
             name="descricao"
             label="Descrição"
             placeholder={
-              type === "gastos"
+              type === "financeiro"
                 ? "Descrição do gasto"
                 : "Descrição da atividade"
             }

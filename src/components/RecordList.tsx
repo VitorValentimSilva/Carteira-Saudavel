@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import { useData } from "../contexts/DataContext";
-import { Gastos, Saude } from "../contexts/DataContext";
+import { BaseRecord } from "../contexts/DataContext";
 
 type Props = {
-  type: "gastos" | "saude";
+  type: "financeiro" | "saude";
 };
 
 export default function RecordList({ type }: Props) {
   const { getRecords, loading, error } = useData();
-  const [records, setRecords] = useState<(Gastos | Saude)[]>([]);
+  const [records, setRecords] = useState<BaseRecord[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
-      const data =
-        type === "gastos"
-          ? await getRecords<Gastos>(type)
-          : await getRecords<Saude>(type);
+      const data = await getRecords<BaseRecord>(type);
       setRecords(data);
     };
 
     loadData();
   }, [type]);
 
-  const formatValue = (item: Gastos | Saude) => {
-    const isGasto = ["Comida", "Transporte", "Lazer"].includes(item.categoria);
+  const formatValue = (item: BaseRecord) => {
+    const isFinanceiro = ["Comida", "Transporte", "Lazer"].includes(
+      item.categoria
+    );
 
-    if (isGasto) {
+    if (isFinanceiro) {
       return `R$ ${item.valor.toFixed(2)}`;
     }
 
@@ -42,7 +41,7 @@ export default function RecordList({ type }: Props) {
     }
   };
 
-  const renderItem = ({ item }: { item: Gastos | Saude }) => (
+  const renderItem = ({ item }: { item: BaseRecord }) => (
     <View className="bg-white p-4 rounded-lg mb-8 shadow-xl">
       <Text className="text-lg font-semibold text-primary">
         {item.categoria}
@@ -69,7 +68,13 @@ export default function RecordList({ type }: Props) {
     <FlatList
       data={records}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => {
+        if (!item.id) {
+          console.error("Registro inválido:", item);
+          return Math.random().toString();
+        }
+        return item.id;
+      }}
     />
   );
 }

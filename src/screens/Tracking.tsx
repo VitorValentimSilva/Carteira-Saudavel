@@ -8,12 +8,12 @@ import { useNavigation } from "@react-navigation/native";
 import RecordList from "../components/RecordList";
 
 export default function Tracking() {
-  const [activeType, setActiveType] = useState<"gastos" | "saude">("saude");
+  const [activeType, setActiveType] = useState<"financeiro" | "saude">("saude");
   const [showForm, setShowForm] = useState(false);
   const { saveRecord } = useData();
   const navigation = useNavigation();
 
-  const handleTypeChange = (type: "gastos" | "saude") => {
+  const handleTypeChange = (type: "financeiro" | "saude") => {
     setActiveType(type);
     setShowForm(false);
   };
@@ -44,15 +44,17 @@ export default function Tracking() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => handleTypeChange("gastos")}
+          onPress={() => handleTypeChange("financeiro")}
           className="w-1/2 items-center justify-center"
         >
           <View
             className={`${
-              activeType === "gastos" ? "bg-white rounded-xl py-2.5 w-full" : ""
+              activeType === "financeiro"
+                ? "bg-white rounded-xl py-2.5 w-full"
+                : ""
             }`}
           >
-            <Text className="font-semibold text-center">Gasto</Text>
+            <Text className="font-semibold text-center">Financeiro</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -71,7 +73,7 @@ export default function Tracking() {
                   color={colors.PrimaryColor}
                 />
                 <Text className="text-PrimaryColor font-semibold text-lg">
-                  Registrar {activeType === "saude" ? "Saúde" : "Gasto"}
+                  Registrar {activeType === "saude" ? "Saúde" : "Financeiro"}
                 </Text>
               </View>
             </TouchableOpacity>
