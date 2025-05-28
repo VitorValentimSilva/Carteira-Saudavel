@@ -1,4 +1,4 @@
-import { View, Button } from "react-native";
+import { View, Button, TouchableOpacity, Text } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Input from "./Input";
@@ -15,14 +15,16 @@ type FormValues = {
   valor: string;
   descricao: string;
   categoria: string;
+  transacao: "gasto" | "ganho";
 };
 
 export default function Form({ type, onSubmit, onCancel }: Props) {
-  const initialValues = {
+  const initialValues: FormValues = {
     data: "",
     valor: "",
     descricao: "",
     categoria: "",
+    transacao: "gasto",
   };
 
   const getValidationSchema = () => {
@@ -32,16 +34,12 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
         .required("Obrigatório"),
       descricao: Yup.string().required("Obrigatório"),
       categoria: Yup.string().required("Obrigatório"),
-      valor: Yup.number(),
+      valor: Yup.number().required("Obrigatório").min(0.01, "Mínimo R$ 0,01"),
+      transacao: Yup.string().oneOf(["gasto", "ganho"]).required("Obrigatório"),
     };
 
     if (type === "financeiro") {
-      return Yup.object({
-        ...baseSchema,
-        valor: baseSchema.valor
-          .required("Obrigatório")
-          .min(0.01, "Mínimo R$ 0,01"),
-      });
+      return Yup.object(baseSchema);
     }
 
     return Yup.object({
@@ -68,14 +66,54 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
     });
   };
 
+  const getCategories = (transacao: string) => {
+    if (type === "financeiro") {
+      return transacao === "gasto"
+        ? ["Comida", "Transporte", "Lazer"]
+        : ["Salário", "Freelance", "Investimentos"];
+    }
+    return ["Exercício", "Sono", "Água"];
+  };
+
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={getValidationSchema}
       onSubmit={(values: FormValues) => onSubmit(values)}
     >
-      {({ handleSubmit, values }) => (
+      {({ handleSubmit, values, setFieldValue }) => (
         <View className="p-5 gap-4 bg-white rounded-2xl w-full">
+          {type === "financeiro" && (
+            <View className="mb-4">
+              <Text className="text-gray-700 mb-3 text-lg font-semibold">
+                Tipo de Transação
+              </Text>
+              <View className="flex-row gap-3">
+                {["gasto", "ganho"].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => setFieldValue("transacao", option)}
+                    className={`px-4 py-2 rounded-full transition-colors ${
+                      values.transacao === option
+                        ? "bg-blue-600"
+                        : "bg-slate-300"
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        values.transacao === option
+                          ? "text-white"
+                          : "text-black"
+                      }`}
+                    >
+                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
           <Input
             name="data"
             label="Data"
@@ -85,11 +123,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
 
           <CategorySelect
             name="categoria"
-            options={
-              type === "financeiro"
-                ? ["Comida", "Transporte", "Lazer"]
-                : ["Exercício", "Sono", "Água"]
-            }
+            options={getCategories(values.transacao)}
           />
 
           <Input
@@ -119,15 +153,7 @@ export default function Form({ type, onSubmit, onCancel }: Props) {
             keyboardType="decimal-pad"
           />
 
-          <Input
-            name="descricao"
-            label="Descrição"
-            placeholder={
-              type === "financeiro"
-                ? "Descrição do gasto"
-                : "Descrição da atividade"
-            }
-          />
+          <Input name="descricao" label="Descrição" placeholder="Descrição" />
 
           <View className="flex-row justify-between mt-4">
             <View className="flex-1 mr-2">

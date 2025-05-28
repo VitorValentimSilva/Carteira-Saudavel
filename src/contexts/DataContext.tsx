@@ -10,7 +10,6 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
-import { storeData } from "../storage/asyncStorage";
 import { MonthlyData } from "../types";
 import {
   getCurrentMonthData,
@@ -26,6 +25,7 @@ export interface BaseRecord {
   categoria: string;
   criadoEm: Timestamp;
   valor: number;
+  transacao?: "gasto" | "ganho";
 }
 
 type DataContextType = {

@@ -1,11 +1,11 @@
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
-import { Gastos, Saude, useData } from "../contexts/DataContext";
+import { BaseRecord, useData } from "../contexts/DataContext";
 import React, { useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function RecentActivity() {
-  const { getRecentRecords, loading, refreshData } = useData();
-  const [recentItems, setRecentItems] = useState<(Gastos | Saude)[]>([]);
+  const { getRecentRecords, loading } = useData();
+  const [recentItems, setRecentItems] = useState<BaseRecord[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -17,10 +17,12 @@ export default function RecentActivity() {
     }, [])
   );
 
-  const formatValue = (item: Gastos | Saude) => {
-    const isGasto = ["Comida", "Transporte", "Lazer"].includes(item.categoria);
+  const formatValue = (item: BaseRecord) => {
+    const isFinanceiro = ["Comida", "Transporte", "Lazer"].includes(
+      item.categoria
+    );
 
-    if (isGasto) {
+    if (isFinanceiro) {
       return `R$ ${item.valor.toFixed(2)}`;
     }
 
@@ -36,7 +38,7 @@ export default function RecentActivity() {
     }
   };
 
-  const renderItem = ({ item }: { item: Gastos | Saude }) => (
+  const renderItem = ({ item }: { item: BaseRecord }) => (
     <View className="py-3 border-b border-gray-100">
       <View className="flex-row justify-between items-center">
         <View className="flex-1">

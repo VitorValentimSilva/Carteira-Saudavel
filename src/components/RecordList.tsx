@@ -11,6 +11,14 @@ export default function RecordList({ type }: Props) {
   const { getRecords, loading, error } = useData();
   const [records, setRecords] = useState<BaseRecord[]>([]);
 
+  const formatFinancialValue = (valor: number, sign: string) => {
+    const formattedValue = valor.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `${sign} R$ ${formattedValue}`;
+  };
+
   useEffect(() => {
     const loadData = async () => {
       const data = await getRecords<BaseRecord>(type);
@@ -20,36 +28,54 @@ export default function RecordList({ type }: Props) {
     loadData();
   }, [type]);
 
-  const formatValue = (item: BaseRecord) => {
-    const isFinanceiro = ["Comida", "Transporte", "Lazer"].includes(
-      item.categoria
-    );
-
-    if (isFinanceiro) {
-      return `R$ ${item.valor.toFixed(2)}`;
+  const formatValue = (type: string, item: BaseRecord) => {
+    if (type === "financeiro") {
+      const sign = item.transacao === "ganho" ? "+" : "-";
+      return formatFinancialValue(item.valor, sign);
+    } else if (type === "saude") {
+      switch (item.categoria) {
+        case "Exercício":
+          return `${item.valor} minutos`;
+        case "Sono":
+          return `${item.valor} horas`;
+        case "Água":
+          return `${item.valor} litros`;
+        default:
+          return item.valor.toString();
+      }
     }
-
-    switch (item.categoria) {
-      case "Exercício":
-        return `${item.valor} minutos`;
-      case "Sono":
-        return `${item.valor} horas`;
-      case "Água":
-        return `${item.valor} litros`;
-      default:
-        return item.valor.toString();
-    }
+    return item.valor.toString();
   };
 
   const renderItem = ({ item }: { item: BaseRecord }) => (
-    <View className="bg-white p-4 rounded-lg mb-8 shadow-xl">
-      <Text className="text-lg font-semibold text-primary">
-        {item.categoria}
-      </Text>
+    <View className="bg-white p-4 rounded-lg mb-4 shadow-md">
+      <View className="flex-row justify-between items-center mb-2">
+        <Text className="text-lg font-semibold text-gray-800">
+          {item.categoria}
+        </Text>
+        {type === "financeiro" && item.transacao && (
+          <Text
+            className={`text-sm font-medium ${
+              item.transacao === "ganho" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {item.transacao === "ganho" ? "+" : "-"}
+          </Text>
+        )}
+      </View>
       <Text className="text-gray-600 mb-2">{item.descricao}</Text>
-
       <View className="flex-row justify-between items-center">
-        <Text className="text-base font-semibold">{formatValue(item)}</Text>
+        <Text
+          className={`text-base font-semibold ${
+            type === "financeiro"
+              ? item.transacao === "ganho"
+                ? "text-green-600"
+                : "text-red-600"
+              : "text-gray-800"
+          }`}
+        >
+          {formatValue(type, item)}
+        </Text>
         <Text className="text-sm text-gray-500">
           {item.data.toLocaleDateString("pt-BR", {
             day: "2-digit",
