@@ -4,14 +4,12 @@ import { AntDesign } from "@expo/vector-icons";
 import Form from "../components/Form";
 import { colors } from "../styles/colors";
 import { useData } from "../contexts/DataContext";
-import { useNavigation } from "@react-navigation/native";
 import RecordList from "../components/RecordList";
 
 export default function Tracking() {
   const [activeType, setActiveType] = useState<"financeiro" | "saude">("saude");
   const [showForm, setShowForm] = useState(false);
-  const { saveRecord } = useData();
-  const navigation = useNavigation();
+  const { saveRecord, refreshData } = useData();
 
   const handleTypeChange = (type: "financeiro" | "saude") => {
     setActiveType(type);
@@ -21,7 +19,8 @@ export default function Tracking() {
   const handleSubmit = async (values: any) => {
     try {
       await saveRecord(activeType, values);
-      navigation.goBack();
+      setShowForm(false);
+      refreshData();
     } catch (error) {
       Alert.alert("Erro", "Falha ao salvar registro");
     }

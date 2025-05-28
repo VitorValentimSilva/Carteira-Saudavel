@@ -10,11 +10,12 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { useAuth } from "./AuthContext";
-import { MonthlyData } from "../types";
+import { FinanceMonthData, MonthlyData } from "../types";
 import {
   getCurrentMonthData,
   isDateInCurrentMonth,
 } from "../utils/dataProcessing";
+import { isWithinInterval } from "date-fns";
 
 type RecordType = "financeiro" | "saude";
 
@@ -34,6 +35,7 @@ type DataContextType = {
   getRecentRecords: () => Promise<BaseRecord[]>;
   refreshData: () => void;
   getMonthData: () => Promise<MonthlyData>;
+  getFinanceMonthData: () => Promise<FinanceMonthData>;
   refreshCount: number;
   loading: boolean;
   error: string | null;
@@ -45,6 +47,7 @@ const DataContext = createContext<DataContextType>({
   getRecentRecords: async () => [],
   refreshData: () => {},
   getMonthData: async () => ({ sleep: [], exercise: [], water: [] }),
+  getFinanceMonthData: async () => ({ totalExpenses: 0, totalEarnings: 0, savings: 0 }),
   refreshCount: 0,
   loading: false,
   error: null,
@@ -170,6 +173,30 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const getFinanceMonthData = async (): Promise<{
+    totalExpenses: number;
+    totalEarnings: number;
+    savings: number;
+  }> => {
+    if (!user) return { totalExpenses: 0, totalEarnings: 0, savings: 0 };
+
+    const records = await getRecords<BaseRecord>("financeiro");
+    const { startOfMonth, endOfMonth } = getCurrentMonthData();
+
+    let totalExpenses = 0;
+    let totalEarnings = 0;
+
+    records.forEach((r) => {
+      if (!isWithinInterval(r.data, { start: startOfMonth, end: endOfMonth }))
+        return;
+      if (r.transacao === "gasto") totalExpenses += r.valor;
+      else if (r.transacao === "ganho") totalEarnings += r.valor;
+    });
+
+    const savings = totalEarnings - totalExpenses;
+    return { totalExpenses, totalEarnings, savings };
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -178,6 +205,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
         getRecentRecords,
         refreshData,
         getMonthData,
+        getFinanceMonthData,
         refreshCount,
         loading,
         error,

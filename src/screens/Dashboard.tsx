@@ -15,9 +15,10 @@ export default function Dashboard() {
   );
 
   return (
-    <View className="flex-1 items-center justify-center gap-4 p-4">
-      <View className="w-full">
-        <BasicPercentages />
+    <View className="flex-1 items-center justify-center p-4">
+      <View className="flex-row justify-between items-center mb-4 w-full">
+        <BasicPercentages view="health" />
+        <BasicPercentages view="finance" />
       </View>
 
       <RecentActivity />

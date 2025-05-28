@@ -56,14 +56,18 @@ export const calculateSavingsEfficiency = (
   return Math.min((savings / idealSavings) * 100, 100);
 };
 
-export const calculateFinancialPercentage = (
-  expenses: number,
-  budget: number,
+export const calculateFinancePercentage = (
+  totalExpenses: number,
+  totalEarnings: number,
   savings: number
 ): number => {
-  const budgetAdherence = calculateBudgetAdherence(expenses, budget);
-  const savingsEfficiency = calculateSavingsEfficiency(savings, budget);
-  return (budgetAdherence + savingsEfficiency) / 2;
+  if (totalEarnings === 0) {
+    return 0;
+  }
+  const expenseRatio = Math.max(0, 1 - totalExpenses / totalEarnings);
+  const savingsRatio = Math.min(1, savings / totalEarnings);
+  const pct = ((expenseRatio + savingsRatio) / 2) * 100;
+  return Math.min(Math.max(pct, 0), 100);
 };
 
 export const calculateOverallPercentage = (
