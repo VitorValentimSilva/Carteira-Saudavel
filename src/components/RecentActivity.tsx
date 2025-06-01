@@ -57,7 +57,7 @@ export default function RecentActivity() {
   );
 
   return (
-    <View className="bg-white p-4 rounded-lg mb-8 shadow-sm w-full">
+    <View className="bg-white p-4 rounded-lg shadow-sm w-full">
       <Text className="text-lg font-bold mb-4">Atividade Recente</Text>
 
       {loading ? (

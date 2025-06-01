@@ -1,9 +1,10 @@
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import RecentActivity from "../components/RecentActivity";
 import { useData } from "../contexts/DataContext";
 import { useFocusEffect } from "@react-navigation/native";
 import React from "react";
 import BasicPercentages from "../components/BasicPercentages";
+import WalletScore from "../components/WalletScore";
 
 export default function Dashboard() {
   const { refreshData } = useData();
@@ -15,13 +16,25 @@ export default function Dashboard() {
   );
 
   return (
-    <View className="flex-1 items-center justify-center p-4">
-      <View className="flex-row justify-between items-center mb-4 w-full">
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{
+        padding: 16,
+        alignItems: "center",
+        gap: 20,
+        paddingBottom: 55,
+      }}
+    >
+      <WalletScore />
+
+      <View className="flex-row justify-between items-center w-full">
         <BasicPercentages view="health" />
         <BasicPercentages view="finance" />
       </View>
 
       <RecentActivity />
-    </View>
+
+      <View className="h-1 bg-transparent" />
+    </ScrollView>
   );
 }

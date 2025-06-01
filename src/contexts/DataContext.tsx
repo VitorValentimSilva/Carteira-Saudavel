@@ -47,7 +47,11 @@ const DataContext = createContext<DataContextType>({
   getRecentRecords: async () => [],
   refreshData: () => {},
   getMonthData: async () => ({ sleep: [], exercise: [], water: [] }),
-  getFinanceMonthData: async () => ({ totalExpenses: 0, totalEarnings: 0, savings: 0 }),
+  getFinanceMonthData: async () => ({
+    totalExpenses: 0,
+    totalEarnings: 0,
+    savings: 0,
+  }),
   refreshCount: 0,
   loading: false,
   error: null,
@@ -70,9 +74,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       const dateParts = formData.data.split("/");
       if (dateParts.length !== 3) throw new Error("Formato de data inválido");
 
+      const day = Number(dateParts[0]);
+      const month = Number(dateParts[1]) - 1;
+      const year = Number(dateParts[2]);
+
       const recordData = {
         ...formData,
-        data: new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`),
+        data: new Date(year, month, day),
         valor: parseFloat(formData.valor) || 0,
         criadoEm: serverTimestamp(),
         descricao: formData.descricao || "",
