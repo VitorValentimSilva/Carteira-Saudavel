@@ -71,7 +71,7 @@ export default function WalletScore() {
     <View className="bg-white rounded-xl w-full">
       <View className="items-center p-4 rounded-lg gap-3">
         <Text className="font-semibold text-base">
-          Sua pontuação na carteira de saúde
+          Sua pontuação na carteira saudável
         </Text>
         <Text className="text-PrimaryColor font-bold text-5xl">
           {walletScore}
